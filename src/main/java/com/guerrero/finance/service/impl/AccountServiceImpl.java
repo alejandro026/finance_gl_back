@@ -5,8 +5,10 @@ import com.guerrero.finance.model.AccountType;
 import com.guerrero.finance.repository.AccountRepository;
 import com.guerrero.finance.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -80,10 +82,16 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void adjustBalance(Long accountId, BigDecimal amountChange) {
+    public void adjustBalance(Long accountId, String username, BigDecimal amountChange) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found with id: " + accountId));
-        account.setBalance(account.getBalance().add(amountChange));
+                // Mismo error si no existe o es de otro usuario: no revela ids ajenos.
+                .filter(a -> a.getUsername().equals(username))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+
+        // Tarjeta de crédito: el saldo es lo que se debe. Un gasto (flujo negativo) AUMENTA la deuda
+        // y un pago/abono (flujo positivo) la reduce. Consistente con el cálculo de netWorth.
+        BigDecimal delta = account.getType() == AccountType.CREDIT_CARD ? amountChange.negate() : amountChange;
+        account.setBalance(account.getBalance().add(delta));
         accountRepository.save(account);
     }
 }

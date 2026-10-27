@@ -96,14 +96,14 @@ public class TransactionServiceImpl implements TransactionService {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) == 0) return;
 
         if (tx.getType() == TransactionType.INCOME && tx.getAccountId() != null) {
-            accountService.adjustBalance(tx.getAccountId(), amount);
+            accountService.adjustBalance(tx.getAccountId(), tx.getUsername(), amount);
         } else if (tx.getType() == TransactionType.EXPENSE && tx.getAccountId() != null) {
-            accountService.adjustBalance(tx.getAccountId(), amount.negate());
+            accountService.adjustBalance(tx.getAccountId(), tx.getUsername(), amount.negate());
         } else if (tx.getType() == TransactionType.TRANSFER && tx.getAccountId() != null && tx.getDestinationAccountId() != null) {
             // Origin Account (AccountId) loses money
-            accountService.adjustBalance(tx.getAccountId(), amount.negate());
+            accountService.adjustBalance(tx.getAccountId(), tx.getUsername(), amount.negate());
             // Destination Account (DestinationAccountId) gains money
-            accountService.adjustBalance(tx.getDestinationAccountId(), amount);
+            accountService.adjustBalance(tx.getDestinationAccountId(), tx.getUsername(), amount);
         }
     }
 
@@ -113,14 +113,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (tx.getType() == TransactionType.INCOME && tx.getAccountId() != null) {
             // Revert income = subtract money
-            accountService.adjustBalance(tx.getAccountId(), amount.negate());
+            accountService.adjustBalance(tx.getAccountId(), tx.getUsername(), amount.negate());
         } else if (tx.getType() == TransactionType.EXPENSE && tx.getAccountId() != null) {
             // Revert expense = add money back
-            accountService.adjustBalance(tx.getAccountId(), amount);
+            accountService.adjustBalance(tx.getAccountId(), tx.getUsername(), amount);
         } else if (tx.getType() == TransactionType.TRANSFER && tx.getAccountId() != null && tx.getDestinationAccountId() != null) {
             // Revert transfer: add back to origin, subtract from destination
-            accountService.adjustBalance(tx.getAccountId(), amount);
-            accountService.adjustBalance(tx.getDestinationAccountId(), amount.negate());
+            accountService.adjustBalance(tx.getAccountId(), tx.getUsername(), amount);
+            accountService.adjustBalance(tx.getDestinationAccountId(), tx.getUsername(), amount.negate());
         }
     }
 }
