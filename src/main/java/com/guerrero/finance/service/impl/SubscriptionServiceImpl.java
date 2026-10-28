@@ -31,6 +31,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public Subscription createSubscription(String username, Subscription subscription) {
         subscription.setUsername(username);
+        subscription.setId(null); // evita IDOR: el id lo asigna la BD
         subscription.setActive(true);
         if (subscription.getNextBillingDate() == null) {
             subscription.setNextBillingDate(LocalDate.now());
@@ -90,7 +91,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         .date(sub.getNextBillingDate())
                         .accountId(sub.getAccountId())
                         .username(username)
-                        .description("Cobro automático recurrente de suscripción activa.")
+                        .description(com.guerrero.finance.service.impl.TransactionServiceImpl.AUTO_CHARGE_DESCRIPTION)
                         .build();
 
                 transactionService.createTransaction(username, transaction);

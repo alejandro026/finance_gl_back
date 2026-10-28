@@ -41,6 +41,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public Account createAccount(String username, Account account) {
         account.setUsername(username);
+        account.setId(null); // evita IDOR: el id lo asigna la BD
         if (account.getBalance() == null) {
             account.setBalance(BigDecimal.ZERO);
         }

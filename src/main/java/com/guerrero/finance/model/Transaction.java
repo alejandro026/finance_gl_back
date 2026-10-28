@@ -6,7 +6,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_transactions_user_external", columnNames = {"username", "external_id"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,4 +44,11 @@ public class Transaction {
     private Long accountId;
 
     private Long destinationAccountId;
+
+    /**
+     * Llave de idempotencia enviada por la app móvil (hash de la notificación).
+     * Si llega dos veces el mismo valor, se devuelve el movimiento ya creado.
+     */
+    @Column(name = "external_id", length = 80)
+    private String externalId;
 }

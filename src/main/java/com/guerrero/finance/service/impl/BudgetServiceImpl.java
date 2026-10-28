@@ -24,6 +24,7 @@ public class BudgetServiceImpl implements BudgetService {
     @Transactional
     public Budget createOrUpdateBudget(String username, Budget budget) {
         budget.setUsername(username);
+        budget.setId(null); // evita IDOR: el upsert es por categoría + mes, nunca por id del cliente
         Optional<Budget> existing = budgetRepository.findByUsernameAndCategoryAndMonth(
                 username, budget.getCategory(), budget.getMonth()
         );

@@ -23,6 +23,7 @@ public class SavingsGoalServiceImpl implements SavingsGoalService {
     @Transactional
     public SavingsGoal createSavingsGoal(String username, SavingsGoal savingsGoal) {
         savingsGoal.setUsername(username);
+        savingsGoal.setId(null); // evita IDOR: el id lo asigna la BD
         return savingsGoalRepository.save(savingsGoal);
     }
 

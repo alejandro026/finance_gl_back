@@ -40,4 +40,15 @@ public class Subscription {
 
     @Column(nullable = false)
     private String username;
+
+    /** Mueve nextBillingDate al siguiente ciclo (MONTHLY por defecto). */
+    public void advanceBillingDate() {
+        if (nextBillingDate == null) return;
+        String cycle = billingCycle != null ? billingCycle.toUpperCase() : "MONTHLY";
+        nextBillingDate = switch (cycle) {
+            case "WEEKLY" -> nextBillingDate.plusWeeks(1);
+            case "YEARLY" -> nextBillingDate.plusYears(1);
+            default -> nextBillingDate.plusMonths(1);
+        };
+    }
 }
